@@ -1,0 +1,43 @@
+
+include_directories(${CMAKE_SOURCE_DIR}/lib/glfw/include/GLFW)
+include_directories(${CMAKE_SOURCE_DIR}/lib/glew/include/GL)
+
+
+set(glfwShareLib ${CMAKE_SOURCE_DIR}/lib/glfw/lib-vc2022)
+set(glewShareLib ${CMAKE_SOURCE_DIR}/lib/glew/lib/Release/x64)
+set(glewShareDll ${CMAKE_SOURCE_DIR}/lib/glew/bin/Release/x64)
+
+set(PROJECTS
+    glHelloWorld
+    glPoint
+)
+set(glHelloWorldSources
+    hl.cpp
+)
+set(glPointSources
+    dot.cpp
+    ${srcCommon}/shadererr.cpp
+)
+
+
+foreach(target_name IN LISTS PROJECTS)
+    project(${target_name} LANGUAGES CXX)
+    message("target_name:${target_name}")
+    set(targetsource "${target_name}Sources")
+    message("targetsource:${targetsource}")
+    set(targetinclude "${target_name}includes")
+    message("targetinclude:${targetsource}")
+    add_executable(${target_name} ${${targetsource}})
+    target_link_libraries(${target_name} ${glfwShareLib}/glfw3.lib)
+    target_link_libraries(${target_name} ${OPENGL_gl_LIBRARY})
+    target_link_libraries(${target_name} ${glewShareLib}/glew32.lib)
+endforeach()
+target_include_directories(glPoint PUBLIC ${incCommon})
+
+add_custom_target(copy_dll ALL
+    COMMAND echo "copydll"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${glewShareDll}/glew32.dll"
+        "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+        DEPENDS ${PROJECTS}
+)
