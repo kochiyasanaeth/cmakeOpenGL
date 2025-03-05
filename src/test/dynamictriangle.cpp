@@ -4,20 +4,22 @@
 #include "glfw3.h"
 #include <gl\gl.h>
 #include "shaderopt.hpp"
-
+#include "cstdio"
+#include <thread>
+#include <chrono>
 GLint creShaderProgram()
 {
-    const char * vshadersource= 
-    "#version 430\n"
-    "void main(void)\n"
-    "{gl_Position = vec4(1.0,0.0,0.0,1.0);};"
-    ;
     const char * fshadersource= 
     "#version 430\n"
     "out vec4 color;\n"
     "void main(void)\n"
-    "{color = vec4(0.0,0.0,1.0,1.0);};"
+    "{color = vec4(0.0,1.0,1.0,1.0);};"
     ;
+    myShader::shaderLoad _vsd("./triangledraw.glsl");
+    char * vshadersource = NULL;
+    if(_vsd.shaderGetContentSize()) {
+        vshadersource = _vsd.shaderGetCharContent();
+    }
     GLint vshader = glCreateShader(GL_VERTEX_SHADER);
     GLint fshader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(vshader,1,&vshadersource,NULL);
@@ -75,13 +77,28 @@ int main(int argc, char* argv[])
     GLuint vao[1];
     glGenVertexArrays(1,vao);
     glBindVertexArray(vao[0]);
+    float _x = 0.0f;
+    float inc = 0.1f;
     while ((!glfwWindowShouldClose(_window)))
     {
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.0,0.0,0.0,0.0);
+        glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(renProgram);
-        glPointSize(300.0f);
-        glDrawArrays(GL_POINT,0,1);
+        _x += inc;
+        std::cout << _x << std::endl;
+        if(_x > 1.0f) {
+            inc = -0.1f;
+        }
+        else if( _x < -1.0f) {
+            inc = 0.1f;
+        }
+        GLint _offsetLoc = glGetUniformLocation(renProgram,"xoffset");
+        glProgramUniform1f(renProgram,_offsetLoc,_x);
+        glDrawArrays(GL_TRIANGLES,0,3);
         glfwSwapBuffers(_window);
         glfwPollEvents();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     glfwDestroyWindow(_window);
     glfwTerminate();

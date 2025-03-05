@@ -10,18 +10,25 @@ set(glewShareDll ${CMAKE_SOURCE_DIR}/lib/glew/bin/Release/x64)
 set(PROJECTS
     glHelloWorld
     glPoint
+    gldynamicTriangle
 )
 set(glHelloWorldSources
     hl.cpp
 )
 set(glPointSources
     dot.cpp
-    ${srcCommon}/shadererr.cpp
+    ${srcCommon}/shaderopt.cpp
+)
+
+set(gldynamicTriangleSources
+    dynamictriangle.cpp
+    ${srcCommon}/shaderopt.cpp
 )
 
 
 foreach(target_name IN LISTS PROJECTS)
     project(${target_name} LANGUAGES CXX)
+    set(CMAKE_CXX_STANDARD 20)
     message("target_name:${target_name}")
     set(targetsource "${target_name}Sources")
     message("targetsource:${targetsource}")
@@ -32,7 +39,15 @@ foreach(target_name IN LISTS PROJECTS)
     target_link_libraries(${target_name} ${OPENGL_gl_LIBRARY})
     target_link_libraries(${target_name} ${glewShareLib}/glew32.lib)
 endforeach()
+
 target_include_directories(glPoint PUBLIC ${incCommon})
+target_include_directories(gldynamicTriangle PUBLIC ${incCommon})
+
+add_custom_command(TARGET gldynamicTriangle POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_CURRENT_SOURCE_DIR}/triangledraw.glsl"
+        "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+)
 
 add_custom_target(copy_dll ALL
     COMMAND echo "copydll"

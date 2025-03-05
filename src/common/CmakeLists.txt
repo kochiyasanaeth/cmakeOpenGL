@@ -4,8 +4,3 @@ set(glfwShareLib ${CMAKE_SOURCE_DIR}/lib/glfw/lib-vc2022)
 set(glewShareLib ${CMAKE_SOURCE_DIR}/lib/glew/lib/Release/x64)
 set(glewShareDll ${CMAKE_SOURCE_DIR}/lib/glew/bin/Release/x64)
 include_directories(${CMAKE_SOURCE_DIR}/inc)
-
-#add_library(shadererr STATIC shadererr.cpp)
-
-# target_link_libraries(shadererr ${glfwShareLib}/glfw3.lib)
-# target_link_libraries(shadererr ${glewShareLib}/glew32.lib)
