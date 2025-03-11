@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include "glew.h"
 #include "glfw3.h"
-#include <gl\gl.h>
+#include <gl/gl.h>
 #include "shaderopt.hpp"
 #include "cstdio"
 #include <thread>
@@ -15,7 +15,7 @@ GLint creShaderProgram()
     "void main(void)\n"
     "{color = vec4(0.0,1.0,1.0,1.0);};"
     ;
-    myShader::shaderLoad _vsd("./triangledraw.glsl");
+    myShader::shaderLoad _vsd("./triangledraw.vert");
     char * vshadersource = NULL;
     if(_vsd.shaderGetContentSize()) {
         vshadersource = _vsd.shaderGetCharContent();

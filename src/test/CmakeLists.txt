@@ -11,19 +11,27 @@ set(PROJECTS
     glHelloWorld
     glPoint
     gldynamicTriangle
+    gldynamicTriangleoop
 )
 set(glHelloWorldSources
     hl.cpp
 )
 set(glPointSources
     dot.cpp
-    ${srcCommon}/shaderopt.cpp
+    ./shaderopt.cpp
 )
 
 set(gldynamicTriangleSources
     dynamictriangle.cpp
+    ./shaderopt.cpp
+)
+
+
+set(gldynamicTriangleoopSources
+    dynamictriangleoop.cpp
     ${srcCommon}/shaderopt.cpp
 )
+
 
 
 foreach(target_name IN LISTS PROJECTS)
@@ -40,12 +48,14 @@ foreach(target_name IN LISTS PROJECTS)
     target_link_libraries(${target_name} ${glewShareLib}/glew32.lib)
 endforeach()
 
-target_include_directories(glPoint PUBLIC ${incCommon})
-target_include_directories(gldynamicTriangle PUBLIC ${incCommon})
+target_include_directories(glPoint PUBLIC ./)
+target_include_directories(gldynamicTriangle PUBLIC ./)
+target_include_directories(gldynamicTriangleoop PUBLIC ${incCommon}/)
 
-add_custom_command(TARGET gldynamicTriangle POST_BUILD
+add_custom_command(TARGET gldynamicTriangle PRE_BUILD 
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_CURRENT_SOURCE_DIR}/triangledraw.glsl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/triangledraw.vert"
+        "${CMAKE_CURRENT_SOURCE_DIR}/trianglecolor.frag"
         "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
 )
 

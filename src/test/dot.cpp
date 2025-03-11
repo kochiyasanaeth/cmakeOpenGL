@@ -10,13 +10,13 @@ GLint creShaderProgram()
     const char * vshadersource= 
     "#version 430\n"
     "void main(void)\n"
-    "{gl_Position = vec4(1.0,0.0,0.0,1.0);};"
+    "{gl_Position = vec4(0.0,0.0,0.0,1.0);};"
     ;
     const char * fshadersource= 
     "#version 430\n"
     "out vec4 color;\n"
     "void main(void)\n"
-    "{color = vec4(0.0,0.0,1.0,1.0);};"
+    "{color = vec4(0.0,0.0,1.0,0.0);};"
     ;
     GLint vshader = glCreateShader(GL_VERTEX_SHADER);
     GLint fshader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -78,12 +78,13 @@ int main(int argc, char* argv[])
     while ((!glfwWindowShouldClose(_window)))
     {
         glUseProgram(renProgram);
-        glPointSize(300.0f);
         glDrawArrays(GL_POINT,0,1);
+        glClear(GL_COLOR_BUFFER_BIT);
         glfwSwapBuffers(_window);
         glfwPollEvents();
     }
     glfwDestroyWindow(_window);
     glfwTerminate();
+    system("pause");
 }
 

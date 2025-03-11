@@ -1,23 +1,39 @@
+#include<vector>
+#include<utility> 
+#include<string>
+
 namespace myShader{
-    class shaderErr
-    {
-    public:
-        shaderErr() = delete;
-        static void printShaderLog(GLuint shader);
-        static void printProgramLog(GLuint shader);
-        static bool checkGLerr();
-    };
-    
-    class shaderLoad
+    class shaderSource
     {
         public:
-        shaderLoad() = delete;
-        shaderLoad(std::string path);
-        std::string shaderGetContent(void);
-        size_t shaderGetContentSize(void);
-        char *shaderGetCharContent(void);
-        shaderLoad& shaderImportContent(std::string path);
+        using shaderType = enum {
+            vertexShader,
+            fragmentShader,
+            geometryShader,
+            tessellationControlShader,
+            tessellationEvaluationShader,
+            computeShader,
+            maxShader,
+        };
+        shaderSource();
+        shaderSource(std::initializer_list<std::pair<shaderType,std::string>> _list);
+        shaderSource& shadersCompileProgramLink(void);
+        std::vector<int> errLogTagData(void);
+        std::vector<std::string> errLogInfoData(void);
+        void * data();
+        ~shaderSource();
         private:
-        std::string _shdrContent;
+        using logType = enum {
+            shader,
+            program,
+        };
+        class _shaderProgram;
+        std::unique_ptr<_shaderProgram> _sdptr;
+        std::vector<std::pair<shaderType,std::string>> _shaderV;
+        std::vector<int32_t> _errTag;
+        std::vector<std::string> _errInfo;
+        void _getErrLogInfo(logType _t);
+        void _resetShadersContent(void);
+        bool _checkGlErr(void);
     };
 }
