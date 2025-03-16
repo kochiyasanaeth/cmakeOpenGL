@@ -62,14 +62,16 @@ namespace myShader {
             return ret;
         }
     };
-    shaderLoad::shaderLoad(std::string path) {
+    shaderLoad::shaderLoad(std::string path) : _shdrContent(std::string("")){
         std::filesystem::path _pth(path);
         if(!std::filesystem::exists(_pth)) {
             std::cout << __FILE__ << ':'  << __LINE__ << ' ' << path << "not exist" << std::endl;
+            return;
         }
         std::ifstream _file(path, std::ios::in);
         if(!_file.is_open()) {
             std::cout << __FILE__ << ':'  << __LINE__ << ' ' << path << "open fail" << std::endl;
+            return;
         }
         this->_shdrContent =  std::string(std::istreambuf_iterator<char>(_file), std::istreambuf_iterator<char>());
     }
@@ -78,10 +80,12 @@ namespace myShader {
         std::filesystem::path _pth(path);
         if(!std::filesystem::exists(_pth)) {
             std::cout << __FILE__ << ':'  << __LINE__ << ' ' << path << "not exist fail" << std::endl;
+            return *this;
         }
         std::ifstream _file(path);
         if(!_file.is_open()) {
             std::cout << __FILE__ << ':'  << __LINE__ << ' ' << path << "open fail" << std::endl;
+            return *this;
         }
         this->_shdrContent =  std::string(std::istreambuf_iterator<char>(_file), std::istreambuf_iterator<char>());
         return *this;
@@ -232,7 +236,7 @@ namespace myShader {
             if(_shaderV[i].first != maxShader) {
                 std::cout <<  i << ':' << _shaderV[i].first << std::endl;
                 shaderLoad _sld(_shaderV[i].second);
-                if(_sld.shaderGetContentSize() == 0) break;
+                if(_sld.shaderGetContentSize() == 0) {std::cout << "shader name:" << _shaderV[i].second << "not exist" << std::endl; return *this;};
                 char* _sdsource = _sld.shaderGetCharContent();
                 _sdComplied = _stepShaderCompile()(_sdsource,_getGlShadertype()(_shaderV[i].first),_sd);
                 if(_sdComplied != 1) {
@@ -255,6 +259,7 @@ namespace myShader {
             _getErrLogInfo(program);
             return *this;
         }
+        std::cout << "done"<< std::endl;
         return *this;
     }
 }

@@ -78,8 +78,9 @@ int main(int argc, char* argv[])
     while ((!glfwWindowShouldClose(_window)))
     {
         glUseProgram(renProgram);
-        glDrawArrays(GL_POINT,0,1);
+        glPointSize(30.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+        glDrawArrays(GL_POINTS,0,1);
         glfwSwapBuffers(_window);
         glfwPollEvents();
     }

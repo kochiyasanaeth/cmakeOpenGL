@@ -15,5 +15,6 @@ if(OPENGL_FOUND)
 endif()
 
 
-add_subdirectory(src/test)
+add_subdirectory(src/unit2)
+add_subdirectory(src/unit4)
 add_subdirectory(src/common)
