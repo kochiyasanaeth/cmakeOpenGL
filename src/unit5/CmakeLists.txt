@@ -1,0 +1,58 @@
+
+include_directories(${CMAKE_SOURCE_DIR}/lib/glfw/include/GLFW)
+include_directories(${CMAKE_SOURCE_DIR}/lib/glew/include/GL)
+include_directories(${CMAKE_SOURCE_DIR}/lib/glm)
+
+include_directories(${incCommon})
+
+set(glfwShareLib ${CMAKE_SOURCE_DIR}/lib/glfw/lib-vc2022)
+set(glewShareLib ${CMAKE_SOURCE_DIR}/lib/glew/lib/Release/x64)
+set(glewShareDll ${CMAKE_SOURCE_DIR}/lib/glew/bin/Release/x64)
+
+set(PROJECTS
+    glTexture
+    glTextureoop
+)
+
+set(glTextureSources
+    ./textetrahedron.cpp
+    ${srcCommon}/shaderopt.cpp
+)
+
+set(glTextureoopSources
+    ./textetrahedronoop.cpp
+    ${srcCommon}/shaderopt.cpp
+    ${srcCommon}/scene.cpp
+)
+
+foreach(target_name IN LISTS PROJECTS)
+    project(${target_name} LANGUAGES CXX)
+    set(CMAKE_CXX_STANDARD 20)
+    set(targetsource "${target_name}Sources")
+    set(targetinclude "${target_name}includes")
+    add_executable(${target_name} ${${targetsource}})
+    target_link_libraries(${target_name} ${glfwShareLib}/glfw3.lib)
+    target_link_libraries(${target_name} ${OPENGL_gl_LIBRARY})
+    target_link_libraries(${target_name} ${glewShareLib}/glew32.lib)
+endforeach()
+
+target_compile_definitions(glTexture PUBLIC STB_IMAGE_IMPLEMENTATION)
+target_compile_definitions(glTextureoop PUBLIC STB_IMAGE_IMPLEMENTATION)
+
+add_custom_command(TARGET  glTexture PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_CURRENT_SOURCE_DIR}/tex.vert"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tex.frag"
+        "${CMAKE_SOURCE_DIR}/asset/TexWood.jpg"
+        "${CMAKE_SOURCE_DIR}/asset/TexMao.jpg"
+        "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+)
+
+
+add_custom_target(copy_dllunit5 ALL
+    COMMAND echo "copydll"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${glewShareDll}/glew32.dll"
+        "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+        DEPENDS ${PROJECTS}
+)

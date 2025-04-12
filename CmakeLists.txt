@@ -1,13 +1,14 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.20)
 include(cmake/submodle_download.cmake)
-
 set (incCommon
     ${CMAKE_SOURCE_DIR}/inc
 )
 set (srcCommon
     ${CMAKE_SOURCE_DIR}/src/common
 )
-
+if(MSVC)
+    add_compile_options(/MP)
+endif()
 find_package(OpenGL REQUIRED)
 if(OPENGL_FOUND)
     message("OPENGL_INCLUDE_DIR:${OPENGL_INCLUDE_DIR}")
@@ -17,4 +18,5 @@ endif()
 
 add_subdirectory(src/unit2)
 add_subdirectory(src/unit4)
+add_subdirectory(src/unit5)
 add_subdirectory(src/common)

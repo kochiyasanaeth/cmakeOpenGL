@@ -14,14 +14,6 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
-  glew
-  URL     https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0-win32.zip/download
-  
-  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lib/glew
-)
-
-
-FetchContent_Declare(
   glm
   URL     https://github.com/g-truc/glm/releases/download/1.0.1/glm-1.0.1-light.7z
 
