@@ -1,5 +1,6 @@
 include_directories(${CMAKE_SOURCE_DIR}/lib/glfw/include/GLFW)
 include_directories(${CMAKE_SOURCE_DIR}/lib/glew/include/GL)
+include_directories(${CMAKE_SOURCE_DIR}/lib/glm)
 set(glfwShareLib ${CMAKE_SOURCE_DIR}/lib/glfw/lib-vc2022)
 set(glewShareLib ${CMAKE_SOURCE_DIR}/lib/glew/lib/Release/x64)
 set(glewShareDll ${CMAKE_SOURCE_DIR}/lib/glew/bin/Release/x64)
