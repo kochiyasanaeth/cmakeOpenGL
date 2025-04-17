@@ -12,6 +12,7 @@ set(glewShareDll ${CMAKE_SOURCE_DIR}/lib/glew/bin/Release/x64)
 set(PROJECTS
     sphere
     ring
+    loadmodle
 )
 
 set(sphereSources
@@ -28,6 +29,13 @@ set(ringSources
     ${srcCommon}/torus.cpp
 )
 
+set(loadmodleSources
+    ./glmodel.cpp
+    ${srcCommon}/shaderopt.cpp
+    ${srcCommon}/scene.cpp
+    ${srcCommon}/loadmodel.cpp
+)
+
 foreach(target_name IN LISTS PROJECTS)
     project(${target_name} LANGUAGES CXX)
     set(CMAKE_CXX_STANDARD 20)
@@ -41,6 +49,7 @@ endforeach()
 
 target_compile_definitions(sphere PUBLIC STB_IMAGE_IMPLEMENTATION)
 target_compile_definitions(ring PUBLIC STB_IMAGE_IMPLEMENTATION)
+target_compile_definitions(loadmodle PUBLIC STB_IMAGE_IMPLEMENTATION)
 
 add_custom_command(TARGET  sphere PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -48,6 +57,16 @@ add_custom_command(TARGET  sphere PRE_BUILD
         "${CMAKE_CURRENT_SOURCE_DIR}/tex.frag"
         "${CMAKE_SOURCE_DIR}/asset/TexWood.jpg"
         "${CMAKE_SOURCE_DIR}/asset/TexMao.jpg"
+        "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+)
+
+add_custom_command(TARGET  loadmodle PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_CURRENT_SOURCE_DIR}/tex.vert"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tex.frag"
+        "${CMAKE_SOURCE_DIR}/asset/TexWood.jpg"
+        "${CMAKE_SOURCE_DIR}/asset/TexMao.jpg"
+        "${CMAKE_SOURCE_DIR}/asset/geo.obj"
         "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
 )
 

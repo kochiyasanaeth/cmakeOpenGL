@@ -210,7 +210,6 @@ namespace myShader {
             else if(_t == shaderSource::program) {
                 glGetProgramInfoLog(_sdptr->_getErrObj(),lenth,&chWritn,log);
             }
-            //printf("%u:%s",__LINE__,log);
             retstr = std::string(log);
             _errInfo.push_back(retstr);
             std::cout << _errInfo.size() << std::endl;
