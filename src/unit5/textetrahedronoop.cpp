@@ -20,7 +20,7 @@ int width = 600,height = 600;
 float aspect;
 glm::mat4 pMat,mMat,vMat,mvMat,tMat,rMat;
 GLuint renProgram;
-GLuint brickTexture;
+GLuint woodTextire;
 
 void loadTexture2D(GLuint &texid,const char *path) {
     int width,height,channels;
@@ -109,8 +109,8 @@ void init() {
     cameraX = 0.4f,cameraY = 0.0f,cameraZ = 8.0f;
     cubeLocx = 0.4f,cubeLocy = -2.0f,cubeLocz = 1.0f;
     setVertices();
-    glGenTextures(1,&brickTexture);
-    loadTexture2D(brickTexture,"TexWood.jpg");
+    glGenTextures(1,&woodTextire);
+    loadTexture2D(woodTextire,"TexWood.jpg");
 }
 
 
@@ -138,8 +138,8 @@ void display(void) {
     glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,0,0);
     glEnableVertexAttribArray(1);
     glActiveTexture(GL_TEXTURE0);
-    glBindTextureEXT(GL_TEXTURE_2D,brickTexture);
-    glBindTexture(GL_TEXTURE_2D,brickTexture);
+    glBindTextureEXT(GL_TEXTURE_2D,woodTextire);
+    glBindTexture(GL_TEXTURE_2D,woodTextire);
     if(glewIsSupported("GL_EXT_texture_filter_anisotropic")) {
         GLfloat anisoSetting = 0.0f;
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT,&anisoSetting);

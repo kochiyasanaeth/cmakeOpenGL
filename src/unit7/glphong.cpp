@@ -11,6 +11,7 @@
 #include "stb_image.hpp"
 #include "scene.hpp"
 #include "torus.hpp"
+#include "material.hpp"
 float cameraX,cameraY,cameraZ;
 float cubeLocx,cubeLocy,cubeLocz;
 constexpr int numVaos = 1,numVbos = 4;
@@ -18,9 +19,52 @@ GLuint vao[numVaos];
 GLuint vbo[numVbos];
 int width = 600,height = 600;
 float aspect;
-glm::mat4 pMat,mMat,vMat,mvMat,tMat,rMat;
+glm::mat4 pMat,mMat,vMat,mvMat,tMat,rMat,invTrMat;
 GLuint renProgram;
 GLuint woodTextire;
+GLuint globalAmbLoc,ambLoc,diffLoc,specLoc,posLoc,mAmLoc,mDiffLoc,mSpecLoc,mShiLoc;
+glm::vec3 currentLightPos,lightPosV;
+glm::vec3 initiallLightLoc = glm::vec3(5.0f,2.0f,2.0f);
+float globalAmbient[4] = {0.7f,0.7f,0.7f,1.0f};
+float lightAmbient[4] = {0.0f,0.0f,0.0f,1.0f};
+float lightDiffuse[4] = {1.0f,1.0f,1.0f,1.0f};
+float lightSpecular[4] = {1.0f,1.0f,1.0f,1.0f};
+mymaterial::glodmaterial materialgold;
+float *matAmb = materialgold.Ambient();
+float *matDif = materialgold.Diffuse();
+float *matSpe = materialgold.Specular();
+float matShi = materialgold.Shininess();
+float lightPos[3];
+
+
+void installLights(glm::mat4 vMatrix) {
+    lightPosV = glm::vec3(vMatrix * glm::vec4(currentLightPos,1.0));
+    //glm::vec4(currentLightPos,1.0);
+    lightPos[0] = lightPosV.x;
+    lightPos[1] = lightPosV.y;
+    lightPos[2] = lightPosV.z;
+
+    globalAmbLoc = glGetUniformLocation(renProgram,"globalAmbient");
+    ambLoc = glGetUniformLocation(renProgram,"light.ambient");
+    diffLoc = glGetUniformLocation(renProgram,"light.diffuse");
+    specLoc = glGetUniformLocation(renProgram,"light.specular");
+    posLoc = glGetUniformLocation(renProgram,"light.position");
+    mAmLoc = glGetUniformLocation(renProgram,"material.ambient");
+    mDiffLoc = glGetUniformLocation(renProgram,"material.diffuse");
+    mSpecLoc = glGetUniformLocation(renProgram,"material.specular");
+    mShiLoc = glGetUniformLocation(renProgram,"material.shininess");
+    
+    glProgramUniform4fv(renProgram,globalAmbLoc,1,globalAmbient);
+    glProgramUniform4fv(renProgram,ambLoc,1,lightAmbient);
+    glProgramUniform4fv(renProgram,diffLoc,1,lightDiffuse);
+    glProgramUniform4fv(renProgram,specLoc,1,lightSpecular);
+    glProgramUniform4fv(renProgram,posLoc,1,lightPos);
+    glProgramUniform4fv(renProgram,mAmLoc,1,matAmb);
+    glProgramUniform4fv(renProgram,mDiffLoc,1,matDif);
+    glProgramUniform4fv(renProgram,mSpecLoc,1,matSpe);
+    glProgramUniform1f(renProgram,mShiLoc,matShi);
+
+}
 
 void loadTexture2D(GLuint &texid,const char *path) {
     int width,height,channels;
@@ -30,6 +74,7 @@ void loadTexture2D(GLuint &texid,const char *path) {
     if(data) {
         glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,data);
         glGenerateMipmap(GL_TEXTURE_2D);
+        std::cout << "load success" << std::endl;
     }
     else
     {
@@ -38,11 +83,11 @@ void loadTexture2D(GLuint &texid,const char *path) {
     stbi_image_free(data);
 }
 
-GLuint mvLoc,proLoc,tfLoc;
+GLuint mvLoc,proLoc,tfLoc,nLoc;
 using msd = myShader::shaderSource; 
 myShader::shaderSource sd = {
-    std::pair<msd::shaderType,std::string>(msd::vertexShader,"tex.vert"),
-    std::pair<msd::shaderType,std::string>(msd::fragmentShader,"tex.frag"),
+    std::pair<msd::shaderType,std::string>(msd::vertexShader,"phong.vert"),
+    std::pair<msd::shaderType,std::string>(msd::fragmentShader,"phong.frag"),
 };
 
 struct dumpLog
@@ -99,6 +144,10 @@ void setVertices(void)
         nvalues.push_back(norm[i].y);
         nvalues.push_back(norm[i].z);
     }
+    //std::cout << "nvalues.size():" << nvalues.size() << ',' << "pvalues.size():" << pvalues.size() << std::endl;
+    for(size_t i = 0;i < 10;i++) {
+            std::cout << "normal[i].x" <<nvalues[i]  << std::endl;
+    }
     glGenVertexArrays(1,vao);
     glBindVertexArray(vao[0]);
     glGenBuffers(4,vbo);
@@ -117,37 +166,47 @@ void init() {
     glUseProgram(renProgram);
     cameraX = 0.4f,cameraY = 0.0f,cameraZ = 8.0f;
     cubeLocx = 0.4f,cubeLocy = -2.0f,cubeLocz = 1.0f;
+    std::cout << __LINE__ << "renProgram:" << renProgram << std::endl;
     setVertices();
+
+    std::cout << __LINE__ << "renProgram:" << renProgram << std::endl;
+
     glGenTextures(1,&woodTextire);
     loadTexture2D(woodTextire,"TexWood.jpg");
+
 }
 
-
 void display(void) {
-    GLint __tetraLocX = 1,__tetraLocY = 1,__tetraLocZ = 0;
+    GLint __tetraLocX = 0,__tetraLocY = 0,__tetraLocZ = 2;
     glClear(GL_DEPTH_BUFFER_BIT);
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(renProgram);
     mvLoc = glGetUniformLocation(renProgram,"mv_matrix");
     proLoc = glGetUniformLocation(renProgram,"proj_matrix");
+    nLoc = glGetUniformLocation(renProgram,"norm_matrix");   
     aspect = (float)width / (float)height;
-    rMat = glm::rotate(glm::mat4(1.0f),(0.60f),glm::vec3(0.0f,1.0f,0.0f));
-    rMat = glm::rotate(rMat,-0.20f,glm::vec3(1.0f,0.0f,0.0f));
+    rMat = glm::rotate(glm::mat4(1.0f),(0.00f),glm::vec3(0.0f,1.0f,0.0f));
+    rMat = glm::rotate(rMat,-0.00f,glm::vec3(1.0f,0.0f,0.0f));
     rMat = glm::rotate(rMat,0.00f,glm::vec3(0.0f,0.0f,1.0f));
     pMat = glm::perspective(1.0472f,aspect,0.1f,1000.0f); // 60 degress
-    glUniformMatrix4fv(proLoc,1,GL_FALSE,glm::value_ptr(pMat));
     vMat = glm::translate(glm::mat4(1.0f),glm::vec3(-cameraX,-cameraY,-cameraZ));
-    mMat = glm::translate(glm::mat4(1.0f),glm::vec3(__tetraLocX,__tetraLocY,__tetraLocZ)) * rMat;
+    // mMat = glm::translate(glm::mat4(1.0f),glm::vec3(__tetraLocX,__tetraLocY,__tetraLocZ)) * rMat;
+    mMat = glm::translate(glm::mat4(1.0f),glm::vec3(__tetraLocX,__tetraLocY,__tetraLocZ));
+    mMat *= glm::rotate(mMat,_ts.toRaidians(25.0f),glm::vec3(1.0f,0.0f,0.0f));
+    currentLightPos = glm::vec3(initiallLightLoc.x,initiallLightLoc.y,initiallLightLoc.z);
+    installLights(vMat);
     mvMat = vMat * mMat;
+    invTrMat = glm::transpose(glm::inverse(mvMat));
+    glUniformMatrix4fv(proLoc,1,GL_FALSE,glm::value_ptr(pMat));
     glUniformMatrix4fv(mvLoc,1,GL_FALSE,glm::value_ptr(mvMat));
+    glUniformMatrix4fv(nLoc,1,GL_FALSE,glm::value_ptr(invTrMat));
     glBindBuffer(GL_ARRAY_BUFFER,vbo[0]);
     glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,0);
     glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER,vbo[1]);
-    glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,0,0);
+    glBindBuffer(GL_ARRAY_BUFFER,vbo[2]);
+    glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,0,0);
     glEnableVertexAttribArray(1);
     glActiveTexture(GL_TEXTURE0);
-    glBindTextureEXT(GL_TEXTURE_2D,woodTextire);
     glBindTexture(GL_TEXTURE_2D,woodTextire);
     if(glewIsSupported("GL_EXT_texture_filter_anisotropic")) {
         GLfloat anisoSetting = 0.0f;
@@ -155,10 +214,11 @@ void display(void) {
         glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAX_ANISOTROPY,anisoSetting);
     }
     glEnable(GL_DEPTH_TEST);
+    glFrontFace(GL_CCW);
+    glEnable(GL_CULL_FACE);
     glDepthFunc(GL_LEQUAL);
-    glBindBuffer(GL_TRIANGLE_STRIP,vbo[3]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vbo[3]);
     glDrawElements(GL_TRIANGLES,_ts.getNumIndices(),GL_UNSIGNED_INT,0);
-
 }
 void winReshaepCb(GLFWwindow* _win,int newWidth,int newHeight) {
     aspect = (float)newWidth / (float)height;
@@ -170,7 +230,7 @@ void winReshaepCb(GLFWwindow* _win,int newWidth,int newHeight) {
 int main()
 {
     std::cout << "hello world" << std::endl;  
-    myScene::scene sc("chapter6 -program2",1080,1080);
+    myScene::scene sc("chapter7 -program2",1080,1080);
     sc.createW();
     sc.setDisplayFunction(display);
     sc.check();

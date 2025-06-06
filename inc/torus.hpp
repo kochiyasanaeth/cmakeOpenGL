@@ -14,6 +14,7 @@ namespace model{
         std::vector<glm::vec3> getNormals();
         std::vector<glm::vec3> getStangents();
         std::vector<glm::vec3> getTtangents();
+        float toRaidians(float degrees);
     private:
         int numVertices;
         int numIndices;
@@ -26,8 +27,6 @@ namespace model{
         std::vector<glm::vec3> normal;
         std::vector<glm::vec3> sTangents;
         std::vector<glm::vec3> tTangents;
-        void init();
-        float toRaidians(float degrees);
-    
+        void init();    
     };
 }
